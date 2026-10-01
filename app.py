@@ -15,7 +15,7 @@ class User(db.Model):
     password = db.Column(db.String(100))
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
     return render_template('login.html')
 
@@ -34,6 +34,22 @@ def signup():
         return "Signup Successful!"
 
     return render_template('signup.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        user = User.query.filter_by(email=email, password=password).first()
+
+        if user:
+            return "Login Successful!"
+        else:
+            return "Invalid Email or Password!"
+
+    return render_template('login.html')
 
 
 if __name__ == "__main__":
