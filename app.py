@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///plpms.db'
+app.config['SECRET_KEY'] = 'plpms_secret_key_123'
 
 db = SQLAlchemy(app)
 
@@ -45,11 +46,20 @@ def login():
         user = User.query.filter_by(email=email, password=password).first()
 
         if user:
-            return "Login Successful!"
+            session['user_id'] = user.id
+            session['user_name'] = user.name
+            return redirect(url_for('dashboard'))
         else:
             return "Invalid Email or Password!"
 
     return render_template('login.html')
+
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' in session:
+        return render_template('dashboard.html', name=session['user_name'])
+    return redirect(url_for('login'))
 
 
 if __name__ == "__main__":
